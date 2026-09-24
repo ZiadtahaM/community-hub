@@ -1,0 +1,2013 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: EduBridge Egypt — Education platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: teachers
+    description: Teacher profiles and operations
+  - name: students
+    description: Student operations
+  - name: parents
+    description: Parent operations
+  - name: courses
+    description: Course management
+  - name: lessons
+    description: Lesson management
+  - name: assignments
+    description: Homework and assignments
+  - name: submissions
+    description: Assignment submissions
+  - name: announcements
+    description: Class announcements
+  - name: messages
+    description: Direct messaging
+  - name: payments
+    description: Payment and subscription management
+  - name: feed
+    description: Community feed / posts
+  - name: analytics
+    description: Dashboard analytics and summaries
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ── AUTH ──────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # ── USERS ─────────────────────────────────────────────────────────────────
+  /users/{userId}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # ── TEACHERS ──────────────────────────────────────────────────────────────
+  /teachers:
+    get:
+      operationId: listTeachers
+      tags: [teachers]
+      summary: List/search teachers
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Teachers list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherListResponse"
+
+  /teachers/{teacherId}:
+    get:
+      operationId: getTeacher
+      tags: [teachers]
+      summary: Get teacher profile
+      parameters:
+        - name: teacherId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Teacher profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherProfile"
+
+  /teachers/{teacherId}/stats:
+    get:
+      operationId: getTeacherStats
+      tags: [teachers]
+      summary: Teacher dashboard stats
+      parameters:
+        - name: teacherId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Teacher stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherStats"
+
+  # ── COURSES ───────────────────────────────────────────────────────────────
+  /courses:
+    get:
+      operationId: listCourses
+      tags: [courses]
+      summary: List courses
+      parameters:
+        - name: teacherId
+          in: query
+          schema:
+            type: integer
+        - name: subject
+          in: query
+          schema:
+            type: string
+        - name: gradeLevel
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Courses list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseListResponse"
+    post:
+      operationId: createCourse
+      tags: [courses]
+      summary: Create a new course
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCourseBody"
+      responses:
+        "201":
+          description: Created course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+
+  /courses/{courseId}:
+    get:
+      operationId: getCourse
+      tags: [courses]
+      summary: Get course details
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+    patch:
+      operationId: updateCourse
+      tags: [courses]
+      summary: Update course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCourseBody"
+      responses:
+        "200":
+          description: Updated course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+    delete:
+      operationId: deleteCourse
+      tags: [courses]
+      summary: Delete course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /courses/{courseId}/enroll:
+    post:
+      operationId: enrollInCourse
+      tags: [courses]
+      summary: Enroll student in course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnrollBody"
+      responses:
+        "201":
+          description: Enrolled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enrollment"
+
+  /courses/{courseId}/students:
+    get:
+      operationId: getCourseStudents
+      tags: [courses]
+      summary: List students enrolled in a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StudentEnrollment"
+
+  # ── LESSONS ───────────────────────────────────────────────────────────────
+  /courses/{courseId}/lessons:
+    get:
+      operationId: listLessons
+      tags: [lessons]
+      summary: List lessons in a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lessons list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lesson"
+    post:
+      operationId: createLesson
+      tags: [lessons]
+      summary: Create a lesson
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLessonBody"
+      responses:
+        "201":
+          description: Created lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+
+  /lessons/{lessonId}:
+    get:
+      operationId: getLesson
+      tags: [lessons]
+      summary: Get lesson details
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+    patch:
+      operationId: updateLesson
+      tags: [lessons]
+      summary: Update lesson
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLessonBody"
+      responses:
+        "200":
+          description: Updated lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+    delete:
+      operationId: deleteLesson
+      tags: [lessons]
+      summary: Delete lesson
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── ASSIGNMENTS ───────────────────────────────────────────────────────────
+  /courses/{courseId}/assignments:
+    get:
+      operationId: listAssignments
+      tags: [assignments]
+      summary: List assignments in a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assignment"
+    post:
+      operationId: createAssignment
+      tags: [assignments]
+      summary: Create assignment
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssignmentBody"
+      responses:
+        "201":
+          description: Created assignment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+
+  /assignments/{assignmentId}:
+    get:
+      operationId: getAssignment
+      tags: [assignments]
+      summary: Get assignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Assignment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+    patch:
+      operationId: updateAssignment
+      tags: [assignments]
+      summary: Update assignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAssignmentBody"
+      responses:
+        "200":
+          description: Updated assignment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+
+  # ── SUBMISSIONS ───────────────────────────────────────────────────────────
+  /assignments/{assignmentId}/submissions:
+    get:
+      operationId: listSubmissions
+      tags: [submissions]
+      summary: List submissions for assignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Submission"
+    post:
+      operationId: submitAssignment
+      tags: [submissions]
+      summary: Submit assignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubmissionBody"
+      responses:
+        "201":
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+
+  /submissions/{submissionId}/grade:
+    patch:
+      operationId: gradeSubmission
+      tags: [submissions]
+      summary: Grade a submission
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GradeSubmissionBody"
+      responses:
+        "200":
+          description: Graded submission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+
+  # ── ANNOUNCEMENTS ─────────────────────────────────────────────────────────
+  /courses/{courseId}/announcements:
+    get:
+      operationId: listAnnouncements
+      tags: [announcements]
+      summary: List announcements in a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Announcements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+    post:
+      operationId: createAnnouncement
+      tags: [announcements]
+      summary: Create announcement
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAnnouncementBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+
+  # ── MESSAGES ──────────────────────────────────────────────────────────────
+  /messages/conversations:
+    get:
+      operationId: listConversations
+      tags: [messages]
+      summary: List conversations
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+
+  /messages/conversations/{conversationId}:
+    get:
+      operationId: getMessages
+      tags: [messages]
+      summary: Get messages in conversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send message
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageBody"
+      responses:
+        "201":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /messages/start:
+    post:
+      operationId: startConversation
+      tags: [messages]
+      summary: Start a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartConversationBody"
+      responses:
+        "201":
+          description: Conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  # ── PAYMENTS ──────────────────────────────────────────────────────────────
+  /payments:
+    get:
+      operationId: listPayments
+      tags: [payments]
+      summary: List payments for a user
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, completed, failed, refunded]
+      responses:
+        "200":
+          description: Payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+    post:
+      operationId: createPayment
+      tags: [payments]
+      summary: Create payment record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentBody"
+      responses:
+        "201":
+          description: Payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+  /payments/{paymentId}:
+    patch:
+      operationId: updatePayment
+      tags: [payments]
+      summary: Update payment status
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePaymentBody"
+      responses:
+        "200":
+          description: Updated payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+  # ── COMMUNITY FEED ────────────────────────────────────────────────────────
+  /feed:
+    get:
+      operationId: listFeedPosts
+      tags: [feed]
+      summary: Get community feed posts
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Feed posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedListResponse"
+    post:
+      operationId: createFeedPost
+      tags: [feed]
+      summary: Create a community post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFeedPostBody"
+      responses:
+        "201":
+          description: Created post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedPost"
+
+  /feed/{postId}:
+    get:
+      operationId: getFeedPost
+      tags: [feed]
+      summary: Get a feed post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedPost"
+    delete:
+      operationId: deleteFeedPost
+      tags: [feed]
+      summary: Delete a feed post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /feed/{postId}/like:
+    post:
+      operationId: likeFeedPost
+      tags: [feed]
+      summary: Like/unlike a post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Like status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeResponse"
+
+  /feed/{postId}/comments:
+    get:
+      operationId: listComments
+      tags: [feed]
+      summary: Get comments on a post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+    post:
+      operationId: createComment
+      tags: [feed]
+      summary: Comment on a post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentBody"
+      responses:
+        "201":
+          description: Comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+
+  # ── ANALYTICS / WOW ENDPOINTS ─────────────────────────────────────────────
+  /analytics/dashboard:
+    get:
+      operationId: getDashboardSummary
+      tags: [analytics]
+      summary: Dashboard summary — totals, counts, trends
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: role
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [teacher, student, parent, admin]
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /analytics/student/{studentId}/progress:
+    get:
+      operationId: getStudentProgress
+      tags: [analytics]
+      summary: Student learning progress per course
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Progress
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StudentProgress"
+
+  /analytics/teacher/{teacherId}/revenue:
+    get:
+      operationId: getTeacherRevenue
+      tags: [analytics]
+      summary: Teacher monthly revenue breakdown
+      parameters:
+        - name: teacherId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Revenue data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RevenuePoint"
+
+  /analytics/trending-courses:
+    get:
+      operationId: getTrendingCourses
+      tags: [analytics]
+      summary: Top trending courses
+      responses:
+        "200":
+          description: Trending courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+
+  /analytics/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [analytics]
+      summary: Recent platform activity feed
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Activity feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /parents/{parentId}/children:
+    get:
+      operationId: getParentChildren
+      tags: [parents]
+      summary: Get children linked to parent
+      parameters:
+        - name: parentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Children list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /parents/{parentId}/link-child:
+    post:
+      operationId: linkChildToParent
+      tags: [parents]
+      summary: Link a child account to parent
+      parameters:
+        - name: parentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkChildBody"
+      responses:
+        "201":
+          description: Linked
+
+  /students/{studentId}/enrollments:
+    get:
+      operationId: getStudentEnrollments
+      tags: [students]
+      summary: Get student's enrolled courses
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Enrollments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enrollment"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    # ── AUTH ──
+    RegisterBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        role:
+          type: string
+          enum: [teacher, student, parent, admin]
+        phone:
+          type: string
+        lang:
+          type: string
+          enum: [ar, en]
+          default: ar
+      required: [name, email, password, role]
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+      required: [token, user]
+
+    # ── USER ──
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameAr:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [teacher, student, parent, admin]
+        avatarUrl:
+          type: string
+        phone:
+          type: string
+        lang:
+          type: string
+          enum: [ar, en]
+        bio:
+          type: string
+        verified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, email, role, createdAt]
+
+    UpdateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: string
+        avatarUrl:
+          type: string
+        phone:
+          type: string
+        bio:
+          type: string
+        lang:
+          type: string
+          enum: [ar, en]
+
+    # ── TEACHER ──
+    TeacherProfile:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        subject:
+          type: string
+        subjectAr:
+          type: string
+        gradeLevel:
+          type: string
+        yearsExperience:
+          type: integer
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        totalStudents:
+          type: integer
+        totalCourses:
+          type: integer
+        hourlyRate:
+          type: number
+        currency:
+          type: string
+          default: EGP
+        tags:
+          type: array
+          items:
+            type: string
+      required: [user, subject]
+
+    TeacherListResponse:
+      type: object
+      properties:
+        teachers:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeacherProfile"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [teachers, total, page, limit]
+
+    TeacherStats:
+      type: object
+      properties:
+        totalStudents:
+          type: integer
+        activeCourses:
+          type: integer
+        pendingAssignments:
+          type: integer
+        monthlyRevenue:
+          type: number
+        averageRating:
+          type: number
+        completionRate:
+          type: number
+        unreadMessages:
+          type: integer
+        upcomingLessons:
+          type: integer
+      required: [totalStudents, activeCourses, pendingAssignments, monthlyRevenue, averageRating, completionRate, unreadMessages, upcomingLessons]
+
+    # ── COURSE ──
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        teacherId:
+          type: integer
+        teacherName:
+          type: string
+        teacherAvatarUrl:
+          type: string
+        subject:
+          type: string
+        gradeLevel:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+          default: EGP
+        coverImageUrl:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+        enrollmentCount:
+          type: integer
+        rating:
+          type: number
+        lessonCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, teacherId, subject, status, createdAt]
+
+    CourseListResponse:
+      type: object
+      properties:
+        courses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Course"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [courses, total, page, limit]
+
+    CreateCourseBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        subject:
+          type: string
+        gradeLevel:
+          type: string
+        price:
+          type: number
+        coverImageUrl:
+          type: string
+      required: [title, subject]
+
+    UpdateCourseBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        subject:
+          type: string
+        gradeLevel:
+          type: string
+        price:
+          type: number
+        coverImageUrl:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+
+    Enrollment:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        courseId:
+          type: integer
+        course:
+          $ref: "#/components/schemas/Course"
+        enrolledAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, completed, dropped]
+        progress:
+          type: number
+      required: [id, studentId, courseId, enrolledAt, status]
+
+    EnrollBody:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        paymentId:
+          type: integer
+      required: [studentId]
+
+    StudentEnrollment:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        studentName:
+          type: string
+        studentAvatarUrl:
+          type: string
+        enrolledAt:
+          type: string
+          format: date-time
+        progress:
+          type: number
+        lastActive:
+          type: string
+          format: date-time
+      required: [studentId, studentName, enrolledAt]
+
+    # ── LESSON ──
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: integer
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        content:
+          type: string
+        videoUrl:
+          type: string
+        duration:
+          type: integer
+          description: Duration in minutes
+        order:
+          type: integer
+        status:
+          type: string
+          enum: [draft, published]
+        scheduledAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, courseId, title, order, status, createdAt]
+
+    CreateLessonBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        content:
+          type: string
+        videoUrl:
+          type: string
+        duration:
+          type: integer
+        order:
+          type: integer
+        scheduledAt:
+          type: string
+          format: date-time
+      required: [title, order]
+
+    UpdateLessonBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        content:
+          type: string
+        videoUrl:
+          type: string
+        duration:
+          type: integer
+        order:
+          type: integer
+        status:
+          type: string
+          enum: [draft, published]
+        scheduledAt:
+          type: string
+          format: date-time
+
+    # ── ASSIGNMENT ──
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: integer
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        maxGrade:
+          type: number
+        submissionCount:
+          type: integer
+        gradedCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, courseId, title, dueDate, maxGrade, createdAt]
+
+    CreateAssignmentBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        maxGrade:
+          type: number
+      required: [title, dueDate, maxGrade]
+
+    UpdateAssignmentBody:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        maxGrade:
+          type: number
+
+    # ── SUBMISSION ──
+    Submission:
+      type: object
+      properties:
+        id:
+          type: integer
+        assignmentId:
+          type: integer
+        studentId:
+          type: integer
+        studentName:
+          type: string
+        content:
+          type: string
+        fileUrl:
+          type: string
+        grade:
+          type: number
+        feedback:
+          type: string
+        status:
+          type: string
+          enum: [submitted, graded, returned]
+        submittedAt:
+          type: string
+          format: date-time
+        gradedAt:
+          type: string
+          format: date-time
+      required: [id, assignmentId, studentId, content, status, submittedAt]
+
+    CreateSubmissionBody:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        content:
+          type: string
+        fileUrl:
+          type: string
+      required: [studentId, content]
+
+    GradeSubmissionBody:
+      type: object
+      properties:
+        grade:
+          type: number
+        feedback:
+          type: string
+      required: [grade]
+
+    # ── ANNOUNCEMENT ──
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: integer
+        authorId:
+          type: integer
+        authorName:
+          type: string
+        authorAvatarUrl:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, courseId, authorId, title, body, createdAt]
+
+    CreateAnnouncementBody:
+      type: object
+      properties:
+        authorId:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+      required: [authorId, title, body]
+
+    # ── MESSAGES ──
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        participantIds:
+          type: array
+          items:
+            type: integer
+        participantNames:
+          type: array
+          items:
+            type: string
+        participantAvatars:
+          type: array
+          items:
+            type: string
+        lastMessage:
+          type: string
+        lastMessageAt:
+          type: string
+          format: date-time
+        unreadCount:
+          type: integer
+      required: [id, participantIds, participantNames, lastMessageAt, unreadCount]
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        senderId:
+          type: integer
+        senderName:
+          type: string
+        senderAvatarUrl:
+          type: string
+        body:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        read:
+          type: boolean
+      required: [id, conversationId, senderId, body, sentAt, read]
+
+    SendMessageBody:
+      type: object
+      properties:
+        senderId:
+          type: integer
+        body:
+          type: string
+      required: [senderId, body]
+
+    StartConversationBody:
+      type: object
+      properties:
+        initiatorId:
+          type: integer
+        recipientId:
+          type: integer
+        firstMessage:
+          type: string
+      required: [initiatorId, recipientId, firstMessage]
+
+    # ── PAYMENT ──
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        teacherId:
+          type: integer
+        courseId:
+          type: integer
+        courseName:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+          default: EGP
+        status:
+          type: string
+          enum: [pending, completed, failed, refunded]
+        method:
+          type: string
+          enum: [cash, vodafone_cash, instapay, card, fawry]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, studentId, teacherId, courseId, amount, currency, status, method, createdAt]
+
+    CreatePaymentBody:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        teacherId:
+          type: integer
+        courseId:
+          type: integer
+        amount:
+          type: number
+        currency:
+          type: string
+          default: EGP
+        method:
+          type: string
+          enum: [cash, vodafone_cash, instapay, card, fawry]
+      required: [studentId, teacherId, courseId, amount, method]
+
+    UpdatePaymentBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, completed, failed, refunded]
+      required: [status]
+
+    # ── FEED ──
+    FeedPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        authorId:
+          type: integer
+        authorName:
+          type: string
+        authorAvatarUrl:
+          type: string
+        authorRole:
+          type: string
+        category:
+          type: string
+          enum: [question, tip, announcement, discussion, resource]
+        title:
+          type: string
+        body:
+          type: string
+        imageUrl:
+          type: string
+        likes:
+          type: integer
+        commentCount:
+          type: integer
+        liked:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, authorId, authorName, authorRole, category, body, likes, commentCount, createdAt]
+
+    FeedListResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedPost"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [posts, total, page, limit]
+
+    CreateFeedPostBody:
+      type: object
+      properties:
+        authorId:
+          type: integer
+        category:
+          type: string
+          enum: [question, tip, announcement, discussion, resource]
+        title:
+          type: string
+        body:
+          type: string
+        imageUrl:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+      required: [authorId, category, body]
+
+    LikeResponse:
+      type: object
+      properties:
+        liked:
+          type: boolean
+        likes:
+          type: integer
+      required: [liked, likes]
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        postId:
+          type: integer
+        authorId:
+          type: integer
+        authorName:
+          type: string
+        authorAvatarUrl:
+          type: string
+        body:
+          type: string
+        likes:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, postId, authorId, authorName, body, likes, createdAt]
+
+    CreateCommentBody:
+      type: object
+      properties:
+        authorId:
+          type: integer
+        body:
+          type: string
+      required: [authorId, body]
+
+    # ── ANALYTICS ──
+    DashboardSummary:
+      type: object
+      properties:
+        totalStudents:
+          type: integer
+        totalCourses:
+          type: integer
+        totalLessons:
+          type: integer
+        totalRevenue:
+          type: number
+        pendingAssignments:
+          type: integer
+        unreadMessages:
+          type: integer
+        upcomingLessons:
+          type: integer
+        weeklyGrowth:
+          type: number
+        activeEnrollments:
+          type: integer
+      required: [totalStudents, totalCourses, totalLessons, totalRevenue, pendingAssignments, unreadMessages, upcomingLessons, weeklyGrowth, activeEnrollments]
+
+    StudentProgress:
+      type: object
+      properties:
+        courseId:
+          type: integer
+        courseName:
+          type: string
+        completedLessons:
+          type: integer
+        totalLessons:
+          type: integer
+        averageGrade:
+          type: number
+        progressPercent:
+          type: number
+        lastActivity:
+          type: string
+          format: date-time
+      required: [courseId, courseName, completedLessons, totalLessons, progressPercent]
+
+    RevenuePoint:
+      type: object
+      properties:
+        month:
+          type: string
+        revenue:
+          type: number
+        enrollments:
+          type: integer
+      required: [month, revenue, enrollments]
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [enrollment, submission, grade, message, announcement, payment]
+        actorName:
+          type: string
+        actorAvatarUrl:
+          type: string
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, type, actorName, description, createdAt]
+
+    LinkChildBody:
+      type: object
+      properties:
+        childId:
+          type: integer
+        linkCode:
+          type: string
+      required: [childId]
